@@ -1,30 +1,68 @@
 package br.ueg.webflux.document;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Document
 public class User implements UserDetails {
-	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3117776853367111175L;
+
 	@Id
     private String id;
     
 	private String name;
     private String username;
     private String password;
-    private String authorities;
     
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private Set<GrantedAuthority> roles = new HashSet<GrantedAuthority>();
+    
+    @Transient
+    private List<String> rolesArray = null;
+    
+    public User(String username, String password){
+        this.username = username;
+        this.password = password;
+    }
+      
+    public List<String> getRolesArray() {
+  		return rolesArray;
+  	}
+
+
+    public void deleteJson() {
+    	this.rolesArray = null;
+    }
+
+  	public void setRolesArray(List<String> rolesArray) {
+  		this.rolesArray = rolesArray;
+  	}
+
+  	public Set<GrantedAuthority> getRoles() {
+  		return roles;
+  	}
+
+  	public void setRoles(Set<GrantedAuthority> roles) {
+  		this.roles = roles;
+  	}
+  	
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+      return roles;
+    }
 	
-	@Override
+    @Override
 	public boolean isAccountNonExpired() {
 		// TODO Auto-generated method stub
 		return true;
@@ -75,10 +113,6 @@ public class User implements UserDetails {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public void setAuthorities(String authorities) {
-		this.authorities = authorities;
 	}
 
 	@Override

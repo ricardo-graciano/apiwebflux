@@ -6,6 +6,8 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import br.ueg.webflux.services.UserServiceImpl;
@@ -29,25 +31,15 @@ public class SecurityConfig {
 					.build();
 	}
 	
-//	@Bean
-//	public MapReactiveUserDetailsService userDetailsService() {
-//		
-//		PasswordEncoder passEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//		UserDetails admin = User.withUsername("admin")
-//										.password(passEncoder.encode("admin"))
-//										.roles("ADMIN", "USER")
-//										.build();
-//		
-//		UserDetails user = User.withUsername("ricardo")
-//										.password(passEncoder.encode("ricardo"))
-//										.roles("USER")
-//										.build();
-//		
-//		return new MapReactiveUserDetailsService(admin, user);
-//	}
-	
 	@Bean
-	ReactiveAuthenticationManager authenticationManager(UserServiceImpl userService) {
-		return new UserDetailsRepositoryReactiveAuthenticationManager(userService);
+	public PasswordEncoder passwordEncoder() {
+	    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	}
+	@Bean
+	ReactiveAuthenticationManager authenticationManager(UserServiceImpl userService, PasswordEncoder passwordEncoder) {
+		PasswordEncoder passEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		UserDetailsRepositoryReactiveAuthenticationManager authenticationManager = new UserDetailsRepositoryReactiveAuthenticationManager(userService);
+		authenticationManager.setPasswordEncoder(passEncoder);
+	    return authenticationManager;
 	}
 }

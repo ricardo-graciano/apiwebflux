@@ -30,7 +30,7 @@ public class UserServiceImpl implements ReactiveUserDetailsService {
 
 	@Override
 	public Mono<UserDetails> findByUsername(String username) {
-		return userRepository.findByUsername(username).cast(UserDetails.class);
+		return userRepository.findByUsername(username);
 	}
 
 }
