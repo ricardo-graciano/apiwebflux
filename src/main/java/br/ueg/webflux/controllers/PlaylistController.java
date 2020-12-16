@@ -3,12 +3,14 @@ package br.ueg.webflux.controllers;
 import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.ueg.webflux.document.Playlist;
 import br.ueg.webflux.services.PlaylistService;
@@ -24,12 +26,14 @@ public class PlaylistController {
 	
 	@GetMapping("/playlists")
 	public Flux<Playlist> getPlaylists(){
-		return playlistService.findAll();
+		return playlistService.findAll()
+				.switchIfEmpty(monoResponseStatusNotFound());
 	}
 	
 	@GetMapping("/playlists/{id}")
 	public Mono<Playlist> getPlaylist(@PathVariable String id){
-		return playlistService.findById(id);
+		return playlistService.findById(id)
+				.switchIfEmpty(monoResponseStatusNotFound());
 	}
 	
 	@PostMapping("/playlists")
@@ -45,5 +49,9 @@ public class PlaylistController {
         System.out.println("Passou aqui events");
         return Flux.zip(interval, events);
         
+	}
+	
+	public <T> Mono<T> monoResponseStatusNotFound(){
+		return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
 	}
 }
